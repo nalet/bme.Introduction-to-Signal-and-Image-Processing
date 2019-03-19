@@ -68,53 +68,53 @@ Introduction to Signal and Image Processing
 The sum of the angles in a poligon is $180(a-2)$, a is the number of angles. 
 Using the three polygons from above we know that in all three polygons the sum of the angles 
 where the vertices meet is $360$, also point $b$. By that circumstances we can use
-\[
-\frac{180(a-2)}{a}b=360
-\]
+\[ \frac{180(a-2)}{a}b=360 \]
 In a simple matter this leads us to
-\[
-(a-2)b=2a
-\]
-The result of the equation above leads us to 6 solutions: 
-\[
-  a=-2,b=1;a=1,b=-2,a=3,b=6;a=4,b=4;a=6,b=3
-\]
+\[ (a-2)b=2a \]
+The result of the equation above leads us to 5 solutions: 
+\[ a=-2,b=1;a=1,b=-2,a=3,b=6;a=4,b=4;a=6,b=3 \]
 As can only use the positives integer soultions, we have (b corresponds number of edges) the polygons
 with 3,4 and 6 edges.
 \end{proof}
+\newpage
 
-\begin{figure}
-\centering
-%omit extension of file. pdflatex will convert to pdf automatically.
-\includegraphics[width=0.8\textwidth]{pics/q1}
-\caption{Example of quadratic function $a=2$, $b=2.5$, $c=0.5$. Roots are highlighted in red.}
-\label{fig:q1}
-\end{figure}
+\section{Lloyd-Max quantization}
+\subsection{}
+Following the notes quanzization from the lecture: We can compute the partial derivatives with respect to $z_{k}$
+\[ \delta = \sum_{k=1}^{K} \int_{z_{k}}^{z_{k+1}} (z-q_{k})^2p(z) dz  \]
+\[ \frac{\partial \delta}{\partial z_{k}} = (z_{k} - q_{k+1})^2 p(z_{k}) - (z_{k} - q_{k})^2 p(z_{k}) = 0\]
+\[ (z_{k} - q_{k+1})^2 p(z_{k}) - (z_{k} - q_{k})^2 p(z_{k}) = 0\]
+\[ (z_{k} - q_{k+1})^2 - (z_{k} - q_{k})^2 = 0\]
+\[ z_{k}^2 - 2 q_{k+1} z_{k} + q_{k+1}^2 - z_{k}^2 - q_{k}z_{k} + q_{k}^2 = 0\]
+\[ 2 z_{k} ( q_{k+1} - q_{k} ) + q_{k+1}^2 + q_{k}^2 = 0\]
+\[ 2 z_{k} = \frac{q_{k+1}^2 + q_{k}^2}{q_{k+1} - q_{k}} \implies 2 z_{k} = \frac{q_{k-1}^2 + q_{k}^2}{q_{k-1} + q_{k}} \]
+\[ 2 z_{k} = \frac{q_{k-1} + q_{k}}{1} \]
+\[ z_{k} = \frac{q_{k-1} + q_{k}}{2} \]
+\subsection{}
+\[ \delta = \sum_{k=1}^{K} \int_{z_{k}}^{z_{k+1}} (z-q_{k})^2p(z) dz  \]
+\[ \frac{\partial \delta}{\partial q_{k}} = \int_{z_{k}}^{z_{k+1}} (z-q_{k})^2p(z) dz = 0\]
+\[ \frac{\partial \delta}{\partial q_{k}} \int_{z_{k}}^{z_{k+1}} z^2 p(z) - 2q_{k}z p(z)  + q_{k}^2 p(z) dz = 0\]
+\[ \frac{\partial \delta}{\partial q_{k}} (q_{k} \int_{z_{k}}^{z_{k+1}} - 2z p(z) dz + q_{k}^2 \int_{z_{k}}^{z_{k+1}} p(z) dz) = 0\]
+\[ \int_{z_{k}}^{z_{k+1}} - 2z p(z) dz + 2q_{k} \int_{z_{k}}^{z_{k+1}} p(z) dz = 0\]
+\[ q_{k} = \frac{\int_{z_{k}}^{z_{k+1}} 2z p(z) dz} {2 \int_{z_{k}}^{z_{k+1}} p(z) dz}\]
+\[ q_{k} = \frac{\int_{z_{k}}^{z_{k+1}} z p(z) dz}{\int_{z_{k}}^{z_{k+1}} p(z) dz}\]
 
-\section{2D convolution}
-We experiment with a box-filter and apply the built-in scipy function as in listing \ref{lst:convolve2d}. An example filtered image is shown in fig. \ref{fig:boxfilter}.
+\subsection{}
+lloyd  will give use the converge, but the solution could be a local minimum. The goal is a optimum quantizer, even distributed groups.
 
-\begin{lstlisting}[style=Python,
-  caption={My 2D convolution approach.},
-  label={lst:convolve2d}]
-from scipy import signal
-img = plt.imread('cat.jpg').astype(np.float32)
-
-def boxfilter(n):
-    # this function returns a box filter of size nxn
-    return (1./(n ** 2))*np.ones((n, n))
-
-bsize = 10
-box_filter = boxfilter(bsize)
-conv_image_box = signal.convolve2d(img, box_filter)
-\end{lstlisting}
-
-\begin{figure}
-\centering
-%omit extension of file. pdflatex will convert to pdf automatically.
-\includegraphics[width=0.8\textwidth]{pics/q2}
-\caption{Filtering with a box-filter of size $10 \times 10$.}
-\label{fig:boxfilter}
-\end{figure}
-
+\section{Chamfer distances}
+\begin{figure}[!htb]
+  \centering
+  %omit extension of file. pdflatex will convert to pdf automatically.
+  \includegraphics[width=0.8\textwidth]{pics/hw1_ex3_template_chamfer.png}
+  \caption{Result of the chamfer distances in given images.}
+  \end{figure}
+\newpage
+\section{Bilinear interpolation}
+\begin{figure}[!htb]
+  \centering
+  %omit extension of file. pdflatex will convert to pdf automatically.
+  \includegraphics[width=0.8\textwidth]{pics/hw1_ex4_template_bilinear_interp.png}
+  \caption{Result of the bilinear interpolation in the image bird.jpg.}
+  \end{figure}
 \end{document}

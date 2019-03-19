@@ -2,7 +2,6 @@ import sys, os
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 def test_interp():
     # Tests the interp() function with a known input and output
     # Leads to error if test fails
@@ -59,20 +58,19 @@ def interp(y_vals, x_vals, x_new):
     #   y_new: Interpolated values, numpy array
 
     ################### PLEASE FILL IN THIS PART ###############################
+    #return np.interp(x_new,x_vals,y_vals) # For testing purposesinterp
     i = 0
     y_new = np.zeros(len(x_new))
-    val_dict = dict(zip(x_vals, y_vals))
+    vdict = dict(zip(x_vals, y_vals))
     for x in x_new:
         # search for the neighbor values of x
-        sorted_x_vals = sorted(x_vals, key=lambda x_val: abs(x-x_val))
-        if (sorted_x_vals[0] < x and sorted_x_vals[1] > x) or (sorted_x_vals[0] > x and sorted_x_vals[1] < x):
-            y_new[i] = (sorted_x_vals[1] - x) / (sorted_x_vals[1] - sorted_x_vals[0]) * val_dict[sorted_x_vals[0]] \
-            + (x - sorted_x_vals[0]) / (sorted_x_vals[1] - sorted_x_vals[0]) * val_dict[sorted_x_vals[1]]
+        sxv = sorted(x_vals, key=lambda x_val: abs(x-x_val)) # How to optimize this...
+        if (sxv[0] < x and sxv[1] > x) or (sxv[0] > x and sxv[1] < x):
+            y_new[i] = (x - sxv[0]) / (sxv[1] - sxv[0]) * vdict[sxv[1]] + (sxv[1] - x) / (sxv[1] - sxv[0]) * vdict[sxv[0]]
         else :
-            y_new[i] = val_dict[sorted_x_vals[0]]
+            y_new[i] = vdict[sxv[0]]
         i += 1
     return y_new
-
 
 def interp_1D(signal, scale_factor):
     # Linearly interpolates one dimensional signal by a given saling fcator
@@ -85,18 +83,9 @@ def interp_1D(signal, scale_factor):
     #   signal_interp: Interpolated 1D signal, numpy array
 
     ################### PLEASE FILL IN THIS PART ###############################
-    leng = len(signal)
-    new_leng = int(leng * scale_factor)
-    # print(leng)
-    # print(scale_factor)
-    # print(new_leng)
-    old_y_vals = signal
-    old_x_vals = np.arange(1, leng+1)
-    # print(old_x_vals)
-    new_x_vals = np.linspace(1, leng, new_leng)
-    # print(new_x_vals)
-    signal_interp = interp(old_y_vals, old_x_vals, new_x_vals)
-    #signal_interp = np.interp(new_x_vals, old_x_vals, old_y_vals)
+    slen = len(signal)
+    signal_interp = interp(signal, np.arange(1, slen+1), np.linspace(1, slen, int(slen * scale_factor)))
+
     return signal_interp
 
 
@@ -112,33 +101,27 @@ def interp_2D(img, scale_factor):
     #   img_interp: interpolated image with the expected output shape, numpy array
 
     ################### PLEASE FILL IN THIS PART ###############################
-    img_shape = img.shape
-    row_nbr = img_shape[0]
-    col_nbr = img_shape[1]
-    img2 = np.zeros((int(row_nbr * scale_factor), col_nbr))
-    img_interp = np.zeros((int(row_nbr * scale_factor), int(col_nbr * scale_factor)))
-    # print(img_shape)
-    # print(scale_factor)
-    if(len(img_shape) == 2): # Greyscale image
-        # print(img2.shape)
-        for col in range(col_nbr):
-            img2[:, col] = interp_1D(img[:, col], scale_factor)
-            # print(img2)
-        for row in range(img2.shape[0]):
-            img_interp[row, :] = interp_1D(img2[row, :], scale_factor)
-            # print(img_interp)
-    elif(len(img_shape) == 3): # RGB image
-        img2 = np.stack((img2, img2, img2), 2)
+    rn = img.shape[0]
+    cn = img.shape[1]
+    nimg = np.zeros((int(rn * scale_factor), cn))
+    img_interp = np.zeros((int(rn * scale_factor), int(cn * scale_factor)))
+
+    if(len(img.shape) == 2): # Greyscale image
+        for col in range(cn):
+            nimg[:, col] = interp_1D(img[:, col], scale_factor)
+        for row in range(nimg.shape[0]):
+            img_interp[row, :] = interp_1D(nimg[row, :], scale_factor)
+    elif(len(img.shape) == 3): # RGB image
+        nimg = np.stack((nimg, nimg, nimg), 2)
         img_interp = np.stack((img_interp, img_interp, img_interp), 2)
-        for col in range(col_nbr):
-            img2[:, col, 0] = interp_1D(img[:, col, 0], scale_factor) # Red
-            img2[:, col, 1] = interp_1D(img[:, col, 1], scale_factor) # Green
-            img2[:, col, 2] = interp_1D(img[:, col, 2], scale_factor) # Blue
-            # print(img2)
-        for row in range(img2.shape[0]):
-            img_interp[row, :, 0] = interp_1D(img2[row, :, 0], scale_factor) # Red
-            img_interp[row, :, 1] = interp_1D(img2[row, :, 1], scale_factor) # Green
-            img_interp[row, :, 2] = interp_1D(img2[row, :, 2], scale_factor) # Blue
+        for row in range(nimg.shape[0]):
+            img_interp[row, :, 0] = interp_1D(nimg[row, :, 0], scale_factor) # Red
+            img_interp[row, :, 1] = interp_1D(nimg[row, :, 1], scale_factor) # Green
+            img_interp[row, :, 2] = interp_1D(nimg[row, :, 2], scale_factor) # Blue
+        for col in range(cn):
+            nimg[:, col, 0] = interp_1D(img[:, col, 0], scale_factor) # Red
+            nimg[:, col, 1] = interp_1D(img[:, col, 1], scale_factor) # Green
+            nimg[:, col, 2] = interp_1D(img[:, col, 2], scale_factor) # Blue
     return img_interp
 
 
