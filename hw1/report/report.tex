@@ -55,20 +55,33 @@ Introduction to Signal and Image Processing
 
 \maketitle
 
-\section{Quadratic function}
+\section{Regular Tesselation}
+\subsection{}
+  There are three shapes that satisfy the two conditions above: triangles, squares and regular hexagon.
+\subsection{}
 \newtheorem{thm}{Theorem}
 \begin{thm}
-$ax^2+bx+c=0$ has 2 real roots if $D>0$.
+  There are three shapes that satisfy the two conditions above: triangles, squares and regular hexagon.
 \end{thm}
 
 \begin{proof}
-This is my proof that $ax^2+bx+c=0$ has 2 real roots if $D>0$.
+The sum of the angles in a poligon is $180(a-2)$, a is the number of angles. 
+Using the three polygons from above we know that in all three polygons the sum of the angles 
+where the vertices meet is $360$, also point $b$. By that circumstances we can use
 \[
-x_{1,2}=\frac{-b\pm\sqrt{D}}{4ac}
+\frac{180(a-2)}{a}b=360
 \]
+In a simple matter this leads us to
+\[
+(a-2)b=2a
+\]
+The result of the equation above leads us to 6 solutions: 
+\[
+  a=-2,b=1;a=1,b=-2,a=3,b=6;a=4,b=4;a=6,b=3
+\]
+As can only use the positives integer soultions, we have (b corresponds number of edges) the polygons
+with 3,4 and 6 edges.
 \end{proof}
-
-An example of a quadratic function is shown on fig. \ref{fig:q1}.
 
 \begin{figure}
 \centering
