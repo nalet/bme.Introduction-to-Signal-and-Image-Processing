@@ -65,7 +65,7 @@ def interp(y_vals, x_vals, x_new):
     for x in x_new:
         # search for the neighbor values of x
         sxv = sorted(x_vals, key=lambda x_val: abs(x-x_val)) # How to optimize this...
-        # We only need the two nearest values -> normalization.
+                                                             # We only need the two nearest values -> normalization.
         if (sxv[0] < x and sxv[1] > x) or (sxv[0] > x and sxv[1] < x):
             y_new[i] = (x - sxv[0]) / (sxv[1] - sxv[0]) * vdict[sxv[1]] + (sxv[1] - x) / (sxv[1] - sxv[0]) * vdict[sxv[0]]
         else :
