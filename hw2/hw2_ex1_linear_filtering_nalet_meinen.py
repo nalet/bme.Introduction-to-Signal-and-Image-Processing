@@ -1,12 +1,12 @@
+import pdb
+import time
+from mpl_toolkits.mplot3d import Axes3D
 """ 1 Linear filtering """
 
 # Imports
 import numpy as np
 import matplotlib.pyplot as plt
 plt.rcParams['image.cmap'] = 'gray'
-from mpl_toolkits.mplot3d import Axes3D
-import time
-import pdb
 
 if __name__ == '__main__':
     img = plt.imread('cat.jpg').astype(np.float32)
@@ -17,15 +17,18 @@ if __name__ == '__main__':
     plt.show()
 
 # 1.1
+
+
 def boxfilter(n):
     # this function returns a box filter of size nxn
 
     ### your code should go here ###
-    box_filter = np.ones((n, n)) / n**2
-    return box_filter
+    return np.ones((n, n)) / n*n
 
 # 1.2
 # Implement full convolution
+
+
 def myconv2(image, filt):
     # This function performs a 2D convolution between image and filt, image being a 2D image. This
     # function should return the result of a 2D convolution of these two images. DO
@@ -38,13 +41,12 @@ def myconv2(image, filt):
     # img_filtered    : 2D filtered image, of size (m+k-1)x(n+l-1)
 
     ### your code should go here ###
-    # get shure that the filter has 2 dimensions
+    # adding checks for 2D
     if np.ndim(filt) < 2:
         filt = filt.reshape(1, len(filt))
     if np.ndim(image) < 2:
         image = image.reshape(1, len(image))
-    if np.ndim(filt) >= 2:  # kernel has 2 dimensions
-        # flip kernel
+    if np.ndim(filt) >= 2:
         filt = np.flip(filt, 0)
         filt = np.flip(filt, 1)
         filtered_img = np.zeros(
@@ -55,9 +57,8 @@ def myconv2(image, filt):
             for col in range(filtered_img.shape[1]):
                 filtered_img[row, col] = np.sum(np.multiply(
                     image[row:row + filt.shape[0], col:col + filt.shape[1]], filt))
-    else:  # kernel has just 1 dimension
-        print("convolution error")
     return filtered_img
+
 
 if __name__ == '__main__':
     # 1.3
@@ -65,13 +66,13 @@ if __name__ == '__main__':
     bsize = 10
 
     ### your code should go here ###
-    bfilt = boxfilter(bsize)
-    res = myconv2(img, bfilt)
-    plt.imshow(res)
+    plt.imshow(myconv2(img, boxfilter(bsize)))
     plt.show()
 
 # 1.4
 # create a function returning a 1D gaussian kernel
+
+
 def gauss1d(sigma, filter_length=20):
     # INPUTS
     # @ sigma         : sigma of gaussian distribution
@@ -103,10 +104,8 @@ def gauss2d(sigma, filter_size=20):
 
     ### your code should go here ###
     g1d = gauss1d(sigma, filter_size)
-    g1dT = g1d.reshape(len(g1d), 1)
-    g2d = myconv2(g1d, g1dT)
-    gauss2d_filter = g2d
-    return gauss2d_filter
+    return myconv2(g1d, g1d.reshape(len(g1d), 1))
+
 
 if __name__ == '__main__':
     # Display a plot using sigma = 3
@@ -117,14 +116,15 @@ if __name__ == '__main__':
 
     plt.figure()
     ax = plt.gca(projection='3d')
-    x_1d = np.linspace(int(-21 / 2), int(21 / 2), 21)
-    y_1d = np.linspace(int(-21 / 2), int(21 / 2), 21)
-    x_2d, y_2d = np.meshgrid(x_1d, y_1d)
-    ax.plot_surface(x_2d, y_2d, gauss2D, cmap=plt.get_cmap("jet"))
+    x2d, y2d = np.meshgrid(np.linspace(
+        int(-21 / 2), int(21 / 2), 21), np.linspace(int(-21 / 2), int(21 / 2), 21))
+    ax.plot_surface(x2d, y2d, gauss2D, cmap=plt.get_cmap("jet"))
     plt.show()
 
 # 1.6
 # Convoltion with gaussian filter
+
+
 def gconv(image, sigma):
     # INPUTS
     # image           : 2d image
@@ -133,18 +133,15 @@ def gconv(image, sigma):
     # @ img_filtered  : filtered image with gaussian filter
 
     ### your code should go here ###
-    filt = gauss2d(sigma, 30)
-    img_filtered = myconv2(image, filt)
+    return myconv2(image, gauss2d(sigma, 30))
 
-    return img_filtered
 
 if __name__ == '__main__':
     # run your gconv on the image for sigma=3 and display the result
     sigma = 3
 
     ### your code should go here ###
-    filtered_image = gconv(img, sigma)
-    plt.imshow(filtered_image)
+    plt.imshow(gconv(img, sigma))
     plt.show()
 
     # 1.7
@@ -155,6 +152,11 @@ if __name__ == '__main__':
     # HINT: How can we use 1D Gaussians?
 
     ### your explanation should go here ###
+    # For each pixel the operations for convolution are n*n, n equals the size, width, 
+    # and height. Usually, this can be made faster with performing a 1d convolution in 
+    # both directions, horizontal and vertical, resulting in 2*n operations for a pixel. 
+    # Convolutions can then be split up. Looking at SVD, with one non-zero 
+    # value the separations in 1d can be made.
 
     # 1.8
     # Computation time vs filter size experiment
@@ -164,18 +166,15 @@ if __name__ == '__main__':
     for size in size_range:
 
         ### your code should go here ###
-        filt1d = gauss2d(sigma, size)[int(size / 2), :]
-        filt1d_transposed = np.transpose(filt1d)
-        filt2d = gauss2d(sigma, size)
+        f1d = gauss2d(sigma, size)[int(size / 2), :]
+        # 1d
         start = time.time()
-        res = myconv2(img, filt2d)
-        end = time.time()
-        t2d.append(end - start)
+        myconv2(img, gauss2d(sigma, size))
+        t2d.append(time.time() - start)
+        # 2d
         start = time.time()
-        res = myconv2(img, filt1d)
-        res = myconv2(res, filt1d_transposed)
-        end = time.time()
-        t1d.append(end - start)
+        myconv2(myconv2(img, f1d), np.transpose(f1d))
+        t1d.append(time.time() - start)
 
     # plot the comparison of the time needed for each of the two convolution cases
     plt.plot(size_range, t1d, label='1D filtering')

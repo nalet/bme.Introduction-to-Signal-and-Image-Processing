@@ -1,10 +1,11 @@
+import hw2_ex1_linear_filtering_nalet_meinen as ex1
+import pdb
 """ 2 Finding edges """
 
 import numpy as np
-from skimage import color, io
+from skimage import color, io, feature
 import matplotlib.pyplot as plt
 plt.rcParams['image.cmap'] = 'gray'
-import pdb
 
 # load image
 img = io.imread('bird.jpg')
@@ -12,22 +13,22 @@ img = color.rgb2gray(img)
 
 
 ### copy functions myconv2, gauss1d, gauss2d and gconv from exercise 1 ###
-import hw2_ex1_linear_filtering_nalet_meinen as ex1
+#see import
 
 # 2.1
 # Gradients
 # define a derivative operator
-dx = np.array([1, 0, -1]) ### your code should go here ###
-dy = np.array([1, 0, -1]).reshape(3, 1) ### your code should go here ###
+dx = np.array([1, 0, -1])  # your code should go here ###
+dy = np.array([1, 0, -1]).reshape(3, 1)  # your code should go here ###
 
 # convolve derivative operator with a 1d gaussian filter with sigma = 1
 # You should end up with 2 1d edge filters,  one identifying edges in the x direction, and
 # the other in the y direction
 sigma = 1
 ### your code should go here ###
-gdx = ex1.myconv2(dx, ex1.gauss1d(sigma)) ### your code should go here ###
-gdy = ex1.myconv2(dy.reshape(1, 3), ex1.gauss1d(sigma))
-gdy = gdy.reshape(gdy.shape[1], 1) ### your code should go here ###
+gdx = ex1.myconv2(dx, ex1.gauss1d(sigma))  # your code should go here ###
+gdy_tmp = ex1.myconv2(dy.reshape(1, 3), ex1.gauss1d(sigma))
+gdy = gdy_tmp.reshape(gdy_tmp.shape[1], 1)  # your code should go here ###
 
 
 # 2.2
@@ -46,31 +47,17 @@ def create_edge_magn_image(image, dx, dy):
     ### your code should go here ###
     if np.ndim(dx) < 2:
         dx = dx.reshape(1, len(dx))
-        #print("dx dim < 2")
-        #print("img dim < 2")
     Dx = ex1.myconv2(image, dx)
-    print("Dx nach convolution: " + str(Dx.shape))
     Dx = Dx[dx.shape[0] - 1:dx.shape[0] - 1 + image.shape[0],
             dx.shape[1] - 1:dx.shape[1] - 1 + image.shape[1]]
-    print("Dx nach cut: " + str(Dx.shape))
     if np.ndim(dy) < 2:
         dy = dy.reshape(len(dy), 1)
     Dy = ex1.myconv2(image, dy)
-    print("Dy nach convolution: " + str(Dy.shape))
     Dy = Dy[dy.shape[0] - 1:dy.shape[0] - 1 + image.shape[0],
             dy.shape[1] - 1:dy.shape[1] - 1 + image.shape[1]]
-    print("Dy nach cut: " + str(Dy.shape))
-    # plt.subplot(121)
-    # plt.imshow(Dx)
-    # plt.subplot(122)
-    # plt.imshow(Dy)
-    # plt.show()
     E = np.sqrt(Dx * Dx + Dy * Dy)
     E = 255 * E / np.max(E)
-    print(E.shape)
     phi = np.arctan2(Dy, Dx)
-    # plt.imshow(phi)
-    # plt.show()
     grad_mag_image = E
     grad_dir_image = phi
 
@@ -93,6 +80,8 @@ plt.show()
 
 # 2.3
 # Edge images of particular directions
+
+
 def make_edge_map(image, dx, dy):
     # INPUTS
     # @image        : a 2D image
@@ -107,11 +96,8 @@ def make_edge_map(image, dx, dy):
     mask = img_edge_mag >= threshold
     edge_maps = np.zeros((image.shape[0], image.shape[1], 8))
 
-    for i in range(0, 8, 1):  # range(-7*math.pi/8, 7*math.pi/8, math.pi/8):
+    for i in range(0, 8, 1):
         angle = -7 * np.pi / 8 + 2 * i * np.pi / 8
-        print("angle = " + str(angle / np.pi * 180))
-        print("range: " + str((angle - np.pi / 8) / np.pi * 180) +
-              " - " + str((angle + np.pi / 8) / np.pi * 180))
         edge_maps[:, :, i] = np.where((img_edge_dir > angle - np.pi /
                                        8) * (img_edge_dir < angle + np.pi / 8), 255, 0)
         edge_maps[:, :, i] = edge_maps[:, :, i] * mask
@@ -154,37 +140,27 @@ def edge_non_max_suppression(img_edge_mag, edge_maps):
         edge_maps[:, :, 6] + edge_maps[:, :, 7]
     total_mask = total_edge_map > 0
     img_edge_mag_total_masked = img_edge_mag * total_mask
-    plt.imshow(img_edge_mag_total_masked)
-    plt.show()
-    for i in range(0, 8, 1):  # range(-7*math.pi/8, 7*math.pi/8, math.pi/8):
-        angle = -7 * np.pi / 8 + 2 * i * np.pi / 8
+    for i in range(0, 8, 1):
         mask = edge_maps[:, :, i] > 0
         toLookAt = img_edge_mag * mask
         img_edge_mag_copy = np.copy(img_edge_mag)
 
-        if i == 0 or i == 4:  # horizontal -> go line by line
+        if i == 0 or i == 4:
             x, y = (toLookAt > 0).nonzero()
             indlist = list(zip(x, y))
             for pos in indlist:
-                #plt.imshow(np.concatenate(
-                #    (img_edge_mag_copy, toLookAt, edge_maps[:, :, i], total_edge_map), axis=1))
-                #plt.title(
-                #    'img_edge_mag_copy, toLookAt, and edge_maps[:, :, ' + str(i) + '], and total_edge_map')
-                #plt.show()
                 if pos[0] >= img_edge_mag.shape[0] - 1 or pos[1] >= img_edge_mag.shape[1] - 1:
-                    print("break1 Position: " + str(pos))
                     break
                 elif (img_edge_mag_total_masked[pos[0], pos[1] - 1] > img_edge_mag_total_masked[pos]) + (img_edge_mag_total_masked[pos[0], pos[1] + 1] > img_edge_mag_total_masked[pos]):
                     edge_maps[pos[0], pos[1], i] = 0
                 else:
                     img_edge_mag_copy[pos[0], pos[1] - 1] = 0
                     img_edge_mag_copy[pos[0], pos[1] + 1] = 0
-        if i == 1 or i == 5:  # 45° -> 1
+        if i == 1 or i == 5:
             x, y = (toLookAt > 0).nonzero()
             indlist = list(zip(x, y))
             for pos in indlist:
                 if pos[0] >= img_edge_mag.shape[0] - 1 or pos[1] >= img_edge_mag.shape[1] - 1:
-                    print("break2 Position: " + str(pos))
                     break
                 elif (img_edge_mag_total_masked[pos[0] - 1, pos[1] - 1] > img_edge_mag_total_masked[pos]) + (img_edge_mag_total_masked[pos[0] + 1, pos[1] + 1] > img_edge_mag_total_masked[pos]):
                     edge_maps[pos[0], pos[1], i] = 0
@@ -192,32 +168,29 @@ def edge_non_max_suppression(img_edge_mag, edge_maps):
                     img_edge_mag_copy[pos[0] - 1, pos[1] - 1] = 0
                     img_edge_mag_copy[pos[0] + 1, pos[1] + 1] = 0
 
-        if i == 2 or i == 6:  # 90° ->
+        if i == 2 or i == 6:
             x, y = (toLookAt > 0).nonzero()
             indlist = list(zip(x, y))
             for pos in indlist:
                 if pos[0] >= img_edge_mag.shape[0] - 1 or pos[1] >= img_edge_mag.shape[1] - 1:
-                    print("break3 Position: " + str(pos))
                     break
                 elif (img_edge_mag_total_masked[pos[0] - 1, pos[1]] > img_edge_mag_total_masked[pos]) + (img_edge_mag_total_masked[pos[0] + 1, pos[1]] > img_edge_mag_total_masked[pos]):
                     edge_maps[pos[0], pos[1], i] = 0
                 else:
                     img_edge_mag_copy[pos[0] - 1, pos[1]] = 0
                     img_edge_mag_copy[pos[0] + 1, pos[1]] = 0
-        if i == 3 or i == 7:  # 45° -> 2
+        if i == 3 or i == 7:
             x, y = (toLookAt > 0).nonzero()
             indlist = list(zip(x, y))
             for pos in indlist:
                 if pos[0] >= img_edge_mag.shape[0] - 1 or pos[1] >= img_edge_mag.shape[1] - 1:
-                    print("break4 Position: " + str(pos))
                     break
                 elif (img_edge_mag_total_masked[pos[0] - 1, pos[1] + 1] > img_edge_mag_total_masked[pos]) + (img_edge_mag_total_masked[pos[0] + 1, pos[1] - 1] > img_edge_mag_total_masked[pos]):
                     edge_maps[pos[0], pos[1], i] = 0
                 else:
                     img_edge_mag_copy[pos[0] - 1, pos[1] + 1] = 0
                     img_edge_mag_copy[pos[0] + 1, pos[1] - 1] = 0
-        #plt.imshow(edge_maps[:, :, i])
-        #plt.show()
+
         non_max_sup = non_max_sup + edge_maps[:, :, i]
 
     return non_max_sup
@@ -230,21 +203,70 @@ plt.title('Original image, magnitude edge, and max suppresion')
 plt.show()
 
 
-# # 2.5
-# # Canny edge detection (BONUS)
-# def canny_edge(image, sigma=2):
-#     # implementation of canny edge detector
-#     # INPUTS
-#     # @image      : 2d image
-#     # @sigma      : sigma parameter of gaussian
-#     # OUTPUTS
-#     # @canny_img  : 2d image of size same as image, with the result of the canny edge detection
+# 2.5
+# Canny edge detection (BONUS)
+def canny_edge(image, sigma=2):
+    # implementation of canny edge detector
+    # INPUTS
+    # @image      : 2d image
+    # @sigma      : sigma parameter of gaussian
+    # OUTPUTS
+    # @canny_img  : 2d image of size same as image, with the result of the canny edge detection
 
-#     ### your code should go here ###
+    ### your code should go here ###
+    gaux_1dfilt = ex1.gauss1d(sigma,np.size(dx))
+    gauy_1dfilt = ex1.gauss1d(sigma,np.size(dy))
+    gradx = ex1.myconv2(dx,gaux_1dfilt)                             # Gdx
+    grady = ex1.myconv2(gauy_1dfilt,dy)                             # Gdy
 
-#     return canny_img
+    g_mag, g_dir = create_edge_magn_image(image, gradx, grady)  # gradient magnitude, direction
+    ed_map = make_edge_map(image, gradx, grady)                 # make_edge_map
+    m_sup = edge_non_max_suppression(g_mag, ed_map)             # non_maxima_suprema
 
-# canny_img = canny_edge(img)
-# plt.imshow(np.concatenate((img, canny_img), axis=1))
-# plt.title('Original image and canny edge detector')
-# plt.show()
+    hg_tsh = 0.8*(np.amax(g_mag)-np.amin(g_mag))               # strong edges > high threshold = 20
+    lw_tsh = 0.5*(np.amax(g_mag)-np.amin(g_mag))                # soft edges   < low threshold  = 10
+
+    canny_img = np.zeros((image.shape))                         # output declaration
+
+    e_map = np.swapaxes(ed_map,1,2)                             # swap axis (255,255,8) -> (255,8,255)
+    maps  = np.swapaxes(e_map,0,1)                              # swap axis (255,8,255) -> (8,255,255)
+
+    size_row = np.size(g_mag,0)
+    size_clm = np.size(g_mag,1)
+    max_val  = np.amax(g_mag)
+    i = 0
+
+    for i_map in maps:
+        mask     = np.column_stack((np.where(i_map[::]>lw_tsh)))
+        for coordinates in mask:
+            y = coordinates[0]
+            x = coordinates[1]
+
+            if (i_map[y,x]>=hg_tsh):
+                canny_img[y,x]=m_sup[y,x]
+                
+            elif (y < size_row-1 and x < size_clm-1):
+                if (i==0 or i== 4):
+                    if (i_map[y+1,x]>=hg_tsh or i_map[y-1,x]>=hg_tsh):
+                        canny_img[y,x]=m_sup[y,x]
+
+                elif (i==1 or i== 5):
+                    if (i_map[y+1,x-1]>=hg_tsh or i_map[y-1,x+1]>=hg_tsh):
+                        canny_img[y,x]=m_sup[y,x]
+
+                elif (i==2 or i== 6):
+                    if (i_map[y,x-1]>=hg_tsh or i_map[y,x+1]>=hg_tsh):
+                        canny_img[y,x]=m_sup[y,x]
+
+                else:
+                    if (i_map[y+1,x+1]>=hg_tsh or i_map[y-1,x-1]>=hg_tsh):
+                        canny_img[y,x]=m_sup[y,x]
+
+        i+=1
+
+    return canny_img
+
+canny_img = canny_edge(img)
+plt.imshow(np.concatenate((img, canny_img), axis=1))
+plt.title('Original image and canny edge detector')
+plt.show()
