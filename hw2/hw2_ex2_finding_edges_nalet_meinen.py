@@ -19,7 +19,7 @@ img = color.rgb2gray(img)
 # Gradients
 # define a derivative operator
 dx = np.array([1, 0, -1])  # your code should go here ###
-dy = np.array([1, 0, -1]).reshape(3, 1)  # your code should go here ###
+dy = dx.reshape(3, 1)  # your code should go here ###
 
 # convolve derivative operator with a 1d gaussian filter with sigma = 1
 # You should end up with 2 1d edge filters,  one identifying edges in the x direction, and
@@ -214,54 +214,43 @@ def canny_edge(image, sigma=2):
     # @canny_img  : 2d image of size same as image, with the result of the canny edge detection
 
     ### your code should go here ###
-    gaux_1dfilt = ex1.gauss1d(sigma,np.size(dx))
-    gauy_1dfilt = ex1.gauss1d(sigma,np.size(dy))
-    gradx = ex1.myconv2(dx,gaux_1dfilt)                             # Gdx
-    grady = ex1.myconv2(gauy_1dfilt,dy)                             # Gdy
+    gx = ex1.myconv2(dx,ex1.gauss1d(sigma,np.size(dx)))                             
+    gy = ex1.myconv2(ex1.gauss1d(sigma,np.size(dy)),dy)                             
 
-    g_mag, g_dir = create_edge_magn_image(image, gradx, grady)  # gradient magnitude, direction
-    ed_map = make_edge_map(image, gradx, grady)                 # make_edge_map
-    m_sup = edge_non_max_suppression(g_mag, ed_map)             # non_maxima_suprema
+    gm, notused = create_edge_magn_image(image, gx, gy)  
+    em = make_edge_map(image, gx, gy)                 
+    ms = edge_non_max_suppression(gm, em)             
 
-    hg_tsh = 0.8*(np.amax(g_mag)-np.amin(g_mag))               # strong edges > high threshold = 20
-    lw_tsh = 0.5*(np.amax(g_mag)-np.amin(g_mag))                # soft edges   < low threshold  = 10
+    h = 0.8*(np.amax(gm)-np.amin(gm))                
+    l = 0.5*(np.amax(gm)-np.amin(gm))                
 
-    canny_img = np.zeros((image.shape))                         # output declaration
+    canny_img = np.zeros((image.shape))                                                 
+    maps  = np.swapaxes(np.swapaxes(em,1,2) ,0,1)                              
 
-    e_map = np.swapaxes(ed_map,1,2)                             # swap axis (255,255,8) -> (255,8,255)
-    maps  = np.swapaxes(e_map,0,1)                              # swap axis (255,8,255) -> (8,255,255)
+    row = np.size(gm,0)
+    clm = np.size(gm,1)
 
-    size_row = np.size(g_mag,0)
-    size_clm = np.size(g_mag,1)
-    max_val  = np.amax(g_mag)
     i = 0
-
     for i_map in maps:
-        mask     = np.column_stack((np.where(i_map[::]>lw_tsh)))
+        mask = np.column_stack((np.where(i_map[::]>l)))
         for coordinates in mask:
             y = coordinates[0]
             x = coordinates[1]
-
-            if (i_map[y,x]>=hg_tsh):
-                canny_img[y,x]=m_sup[y,x]
-                
-            elif (y < size_row-1 and x < size_clm-1):
+            if (i_map[y,x]>=h):
+                canny_img[y,x]=ms[y,x]
+            elif (y < row-1 and x < clm-1):
                 if (i==0 or i== 4):
-                    if (i_map[y+1,x]>=hg_tsh or i_map[y-1,x]>=hg_tsh):
-                        canny_img[y,x]=m_sup[y,x]
-
+                    if (i_map[y+1,x]>=h or i_map[y-1,x]>=h):
+                        canny_img[y,x]=ms[y,x]
                 elif (i==1 or i== 5):
-                    if (i_map[y+1,x-1]>=hg_tsh or i_map[y-1,x+1]>=hg_tsh):
-                        canny_img[y,x]=m_sup[y,x]
-
+                    if (i_map[y+1,x-1]>=h or i_map[y-1,x+1]>=h):
+                        canny_img[y,x]=ms[y,x]
                 elif (i==2 or i== 6):
-                    if (i_map[y,x-1]>=hg_tsh or i_map[y,x+1]>=hg_tsh):
-                        canny_img[y,x]=m_sup[y,x]
-
+                    if (i_map[y,x-1]>=h or i_map[y,x+1]>=h):
+                        canny_img[y,x]=ms[y,x]
                 else:
-                    if (i_map[y+1,x+1]>=hg_tsh or i_map[y-1,x-1]>=hg_tsh):
-                        canny_img[y,x]=m_sup[y,x]
-
+                    if (i_map[y+1,x+1]>=h or i_map[y-1,x-1]>=h):
+                        canny_img[y,x]=ms[y,x]
         i+=1
 
     return canny_img

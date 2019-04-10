@@ -30,30 +30,21 @@ def myharris(image, w_size, sigma, k):
     # @R        : 2-D numpy array of same size as image, containing the R response for each image location
 
     ### your code should go here ###
-    gauss = scipy.signal.windows.gaussian(w_size, sigma)
-    gauss = gauss.reshape(1, len(gauss))
-    gauss_2d = convolve2d(gauss, np.transpose(gauss))
-    image = convolve2d(image, gauss_2d, 'same')
-    # Step 1: Compute derivatives of image
-    dx = np.array([-1, 0, 1])
-    dx = dx.reshape(1, 3)
+    g = scipy.signal.windows.gaussian(w_size, sigma)
+    g = g.reshape(1, len(g))
+    g2d = convolve2d(g, np.transpose(g))
+    image = convolve2d(image, g2d, 'same')
+
+    dx = np.array([-1, 0, 1]).reshape(1, 3)
     dy = np.transpose(dx)
     Ix = convolve2d(image, dx, 'same')
     Iy = convolve2d(image, dy, 'same')
 
-    # Step 2:
-    Sx = convolve2d(Ix * Ix, gauss_2d, 'same')
-    Sy = convolve2d(Iy * Iy, gauss_2d, 'same')
-    Sxy = convolve2d(Ix * Iy, gauss_2d, 'same')
+    Sx = convolve2d(Ix * Ix, g2d, 'same')
+    Sy = convolve2d(Iy * Iy, g2d, 'same')
+    Sxy = convolve2d(Ix * Iy, g2d, 'same')
 
-    # Step 3:
-    det = (Sx * Sy) - k * Sxy**2
-    trace = Sx + Sy
-    R = det / trace
-
-    # Step 4: Find local maxima
-
-    return R
+    return ((Sx * Sy) - k * Sxy**2) / (Sx + Sy)
 
 
 # 3.2
@@ -67,8 +58,7 @@ plt.show()
 # 3.3
 # Repeat with rotated image by 45 degrees
 # HINT: Use scipy.ndimage.rotate() function
-R_rotated = scipy.ndimage.rotate(img, np.pi, (0, 1))
-R_rotated = myharris(R_rotated, 13, 6, 0.1)  ### your code should go here ###
+R_rotated = myharris(scipy.ndimage.rotate(img, np.pi, (0, 1)), 13, 6, 0.1) ### your code should go here ###
 plt.imshow(R_rotated)
 plt.colorbar()
 plt.show()
@@ -77,8 +67,7 @@ plt.show()
 # 3.4
 # Repeat with downscaled image by a factor of half
 # HINT: Use scipy.misc.imresize() function
-R_scaled = scipy.misc.imresize(img, 0.5)
-R_scaled = myharris(R_scaled, 13, 6, 0.1) ### your code should go here ###
+R_scaled = myharris(scipy.misc.imresize(img, 0.5), 13, 6, 0.1) ### your code should go here ###
 plt.imshow(R_scaled)
 plt.colorbar()
 plt.show()

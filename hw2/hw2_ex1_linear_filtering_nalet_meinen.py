@@ -23,7 +23,7 @@ def boxfilter(n):
     # this function returns a box filter of size nxn
 
     ### your code should go here ###
-    return np.ones((n, n)) / n*n
+    return np.ones((n, n)) / (n*n)
 
 # 1.2
 # Implement full convolution
@@ -81,14 +81,11 @@ def gauss1d(sigma, filter_length=20):
     # @ gauss_filter  : 1D gaussian filter
 
     ### your code should go here ###
-    if filter_length % 2 != 0:
-        x = np.linspace(int(-filter_length / 2),
-                        int(filter_length / 2), filter_length)
-    else:
+    if filter_length % 2 == 0:
         filter_length += 1
-        x = np.linspace(int(-filter_length / 2),
-                        int(filter_length / 2), filter_length)
-    gauss_filter = np.exp(-(x**2) / (2 * sigma**2))
+    x = np.linspace(int(-filter_length / 2),
+                    int(filter_length / 2), filter_length)
+    gauss_filter = np.exp(-(x*x) / (2 * sigma*sigma))
     gauss_filter = gauss_filter / sum(gauss_filter)
     return gauss_filter
 
@@ -152,10 +149,10 @@ if __name__ == '__main__':
     # HINT: How can we use 1D Gaussians?
 
     ### your explanation should go here ###
-    # For each pixel the operations for convolution are n*n, n equals the size, width, 
-    # and height. Usually, this can be made faster with performing a 1d convolution in 
-    # both directions, horizontal and vertical, resulting in 2*n operations for a pixel. 
-    # Convolutions can then be split up. Looking at SVD, with one non-zero 
+    # For each pixel the operations for convolution are n*n, n equals the size, width,
+    # and height. Usually, this can be made faster with performing a 1d convolution in
+    # both directions, horizontal and vertical, resulting in 2*n operations for a pixel.
+    # Convolutions can then be split up. Looking at SVD, with one non-zero
     # value the separations in 1d can be made.
 
     # 1.8
