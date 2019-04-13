@@ -58,7 +58,7 @@ plt.show()
 # 3.3
 # Repeat with rotated image by 45 degrees
 # HINT: Use scipy.ndimage.rotate() function
-R_rotated = myharris(scipy.ndimage.rotate(img, np.pi, (0, 1)), 13, 6, 0.1) ### your code should go here ###
+R_rotated = myharris(scipy.ndimage.rotate(img, 45), 13, 6, 0.1) ### your code should go here ###
 plt.imshow(R_rotated)
 plt.colorbar()
 plt.show()

@@ -58,21 +58,12 @@ Finite Element Analysis I
 }
 
 \maketitle
-\section*{Abstract}
-This assignment shows how different modeling approaches of a corner can have 
-an impact on the model. Different methods were discussed and implemented to show 
-significant differences. The plots and the models are created with Abaqus, 
-software from Dassault.
-\pagebreak
+
 \tableofcontents
 \pagebreak
 \section{Introduction}
-We're examining the behavior of an L-beam fixed at one end and subjected 
-to a load at the other end. the region of interest will be the inner 
-corner where we expect the highest stresses. we will examine different 
-setups: no fillet, 1mm fillet, and 5mm fillet.
-
-% I'm refering to something\footnote{footnotes working fine \cite{einstein}} .
+In this assignment three main methods will be analyzed: linear filtering, edge and corner detection. All of those things
+base on the same algorithms or functions witch have to be implemented.
 
 \section{Methods}
 
@@ -231,7 +222,7 @@ the lectures.
   \includegraphics[width=0.5\textwidth]{pics/3_2_s}
   \caption{Result Harris Corner}
 \end{figure}
-Plot from python program.
+Plot from python program. The plot is quite dark but the result is good, as you can see later.
 
 \subsubsection{Rotation}
 \begin{figure}[!htb]
@@ -260,10 +251,11 @@ because the structure matrix can be used for diagonal directions, better as from
 \subsection{Conclusion}
 In this assigment, many different approches for filtering have been examined. It is interesting that all of those appliences 
 have same origins, in our case, same methods that can be reused. Compared to the default implementation of numpy or cv2, or 
-implementation 
+implementation is quite not optimized. During the development stage, compairsion with the library was made. In the last exercise
+even the implementation of a library was used. Such basic function, must be robust and performant. So it is important from a 
+mathematical or computer science perspective to be as accurate as possible, regarding to the use in medical appliances.
 
 
-\pagebreak
 \begin{thebibliography}{1}
   \bibitem{comp_intro} 
   Alasdair McAndrew
