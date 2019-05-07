@@ -1,10 +1,11 @@
+from skimage import feature, color
+import numpy as np
+import matplotlib.pyplot as plt
 import sys
 import matplotlib
+import os
 matplotlib.rcParams['image.cmap'] = 'gray'
 matplotlib.rcParams['image.interpolation'] = 'nearest'
-import matplotlib.pyplot as plt
-import numpy as np
-from skimage import feature, color
 
 
 ##############################################################################
@@ -106,6 +107,9 @@ filename = 'synthetic.jpg'
 #filename = 'bridge.jpg'
 #filename = 'pool.jpg'
 #filename = 'tennis.jpg'
+
+if(len(sys.argv) > 1 and os.path.isfile('./'+sys.argv[1])):
+    filename = sys.argv[1]
 
 image = plt.imread(filename)
 edges = edge_map(image, 1.4)
