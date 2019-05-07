@@ -52,9 +52,9 @@
 
 %\renewcommand{\qedsymbol}{\filledbox}
 
-\title{Assignment 2}%replace X with the appropriate number
+\title{Assignment 3}%replace X with the appropriate number
 \author{Nalet Meinen\\ %replace with your name
-Finite Element Analysis I
+Introduction to Signal and Image Processing
 }
 
 \maketitle
@@ -62,208 +62,134 @@ Finite Element Analysis I
 \tableofcontents
 \pagebreak
 \section{Introduction}
-In this assignment three main methods will be analyzed: linear filtering, edge and corner detection. All of those things
-base on the same algorithms or functions witch have to be implemented.
+In this assignment, two methods will be analyzed that are both iterative methods. First RANSAC will be presented, which means random sample consensus. The algorithm is a good general parameter estimator approach and can get alow well with large proportions of outliners in input data. Imagine a line of points which we will draw a line if one point is of charts most likely the line will get in this direction. RANSAC will not put much weight on those outliners.
+
+With texture synthesis, the goal is to fill an empty space in an image and reconstruct that with an SSD approach. SSD means Sum of squared differences. With the SSD approach, the algorithm select a pixel on the boundary of the space to fill and calculates the SSD. With this result, a pixel from a sample site can then be used to substitute one pixel from the empty space.
 
 \section{Methods}
 
-\subsection{Linear Filtering}
-\begin{figure}[!htb]
-  \centering
-  \includegraphics[width=0.7\textwidth]{pics/linear_filtering}
-  \caption{Example of a boxfilter}
-  \label{fig:linear_filtering}
-\end{figure}
+\subsection{RANSAC}
+RANSAC (RANdom SAmple Consensus) is an iterative method for estimating the parameters of a mathematical model from a set of data with outliners. In this assignment, the goal is to detect sharp lines within images and plot them on it. The algorithm starts with a minimal subset of data points that are needed to fit the model randomly. Second, points with some distance threshold from the model are a consensus set. These points can then be used to determine if the model is supported best. In the first iteration, the first match is stored. If a better is found in a later iteration, the later one is stored. With enough interactions, a good solution can be found.
 
-Linear filterings belongs to the group of neighbour analysis \cite{comp_intro}. As the 
-name neighbour analysis says, the goal is to choose a pixel and analyse its neighbours.
-With the information of the neighbours and depending on our processing strategy it is 
-made possible to modify or enhance images. Applied cases can be smoothing an image or even
-face recognition. Fig. \ref{fig:linear_filtering} shows a boxfilter using a $1/9$ of all
-the pixels of the neighbours and the center giving us a blurred image.
+\subsection{Texture Synthesis}
+The texture is a detail in an image that is at a scale too small to be resolved into its constituent elements and at a scale large enough to be apparent in the spatial distribution of image measurements. So the texture is a kind of a repetitive way to align images at each other but it's not. The goal of texture synthesis is not to see images aligned with each other. The viewer of this image should not see, that the whole image consists of multiple small ones. In complex textures, repetitive artifacts should not be visible e.g. for a people crowd.
 
-\subsection{Finding Edges}
-\begin{figure}[!htb]
-  \centering
-  \includegraphics[width=0.7\textwidth]{pics/canny}
-  \caption{Canny edge detection with (left) high threshold and (right) low threshold}
-\end{figure}
-Edges are boundary pixels which correspond to changes in gradients of physical changes
-in object appearance. The most shapes in an image are consisting of edges. In Fig \ref{fig:canny}
-a so called canny edge algorithm is applied. The high and low threshold determines the density of
-edges we would like to have. Edge detection lies the fondation for basic shape detection in 
-signal and image processing.
-
-\subsection{Corner Detection}
-\begin{figure}[!htb]
-  \centering
-  \includegraphics[width=0.3\textwidth]{pics/corner_detection}
-  \caption{Canny edge detection with (left) high threshold and (right) low threshold}
-  \label{fig:canny}
-\end{figure}
-Fig. \ref{fig:canny} shows us a image with many corners. The red dots are the corner detected.
-Using the two methods from above, one can achive such an image output. From a pratical perspective
-corner detection can be used to detect distortion from a perspective in an image or in medical
-appliences for calibrating instrumens in the OR\footnote{Operation Room}
-\pagebreak
+The algorithm tries to predict how to fill the missing data in an image. Giving an empty space in an image, space should be filled with a sample texture from the image itself. To achieve this the algorithm starts at the corner of the missing data an analyzing every pixel with the weighted sum of all the pixel in the neighborhood. The size of the neighborhood is given by the patch size. The SSD (Sum of Square Differences) determines which pixels, or a variety of pixels, can be used for filling in the missing spot in the image.
 \section{Results and Discussion}
 
-\subsection{Linear Filtering}
+\subsection{RANSAC}
 
-\subsubsection{Boxfilter}
-The boxfilter is a simple one liner. In the development phase the boxfilter was validated with the
-debug function of the IDE.
-\subsubsection{2D Convolution}
-The algorithm checks the dimensions first before proceeding and if nessecary, reshaping. After preparing the output,
-a full convolution is made.
+\subsubsection{fit\_line}
+The function if the mathematical line back as a linear mathematical function consisting of the parameters m and c. To ensure that the line is not horizontal, we subtract the coordinate points. If the difference would be indeed zero, we use the value $\epsilon$ to make it not horizontal.
 
-\subsubsection{Applied Boxfilter}
+\subsubsection{point\_to\_line\_dist}
+The mathematical formula is used $d = \frac{|m \cdot x_{0} - y_{0} + c|}{\sqrt{m^2+1}}$.
+\subsubsection{edge\_map}
+With the knowledge from the previous assignments, a sigma of 3 is used. It was enough to get not any disturbing artifacts and did not push the calculation time up as lower sigma values would.
+\subsubsection{Iteration}
 \begin{figure}[!htb]
   \centering
-  \includegraphics[width=0.8\textwidth]{pics/1_3_s}
-  \caption{Applied box filter}
+  \begin{subfigure}{.5\textwidth}
+    \centering
+    \includegraphics[width=0.95\linewidth]{pics/hw3_ex_1_synthetic_canny}
+    \caption{canny of image}
+  \end{subfigure}%
+  \begin{subfigure}{.5\textwidth}
+    \centering
+    \includegraphics[width=0.95\linewidth]{pics/hw3_ex_1_synthetic_result}
+    \caption{result line}
+   \end{subfigure}
+  \caption{Calculations of synthetic.jpg}
 \end{figure}
-Result of the applied box filter
-
-\subsubsection{1D Gaussian Filter}
-As described in the task, we using checks for making the filter odd. For performance reasons,
-the numpy library with array multiplications and division is used.
-
-\subsubsection{2D Gaussian Filter}
-\begin{figure}[!htb]
-  \centering
-  \includegraphics[width=0.7\textwidth]{pics/1_5_s}
-  \caption{Gaussian kernel in 3D space}
-\end{figure}
-Result of the Gaussian 1D and the $myconf$ function.
-
-\subsubsection{Applied 2D Gaussian Filter}
-\FloatBarrier
-\begin{figure}[!htb]
-  \centering
-  \includegraphics[width=0.6\textwidth]{pics/1_6_s}
-  \caption{Result of the gaussian on an image}
-\end{figure}
-Applied result of our functions.
-\pagebreak
-\FloatBarrier
-\subsubsection{Convolution with a 2D Gaussien Filter}
-This text is also in the code. \newline
-For each pixel the operations for convolution are n*n, n equals the size, width,
-and height. Usually, this can be made faster with performing a 1d convolution in
-both directions, horizontal and vertical, resulting in 2*n operations for a pixel.
-Convolutions can then be split up. Looking at SVD, with one non-zero
-value the separations in 1d can be made.
-
-\subsubsection{Computation Time}
-\begin{figure}[!htb]
-  \centering
-  \includegraphics[width=0.8\textwidth]{pics/1_8_s}
-  \caption{Compairson of 1D and 2D Gaus}
-\end{figure}
-We see that the slop of 2D filtering curve is much steeper, because of the factor 2 of
-the number of dimensions to be calculated.
+\noindent With this low point count, it was enough to match a line. Also, the calculations were fast.
 \newpage
-\subsection{Finding Edges}
-The needed functions are imported via the import statement of python. Measurement has been made,
-that the code of ex1 does not run on the import. These could be made with $if \_\_name\_\_ == '\_\_main\_\_':$
-
-\subsubsection{Derivative Operator}
-Simple implementation of the derivative operator like proposed: $[1, 0, -1]$
-\subsubsection{Edge Magnitude}
+\subsubsection{Results}
 \begin{figure}[!htb]
+  \vspace*{-0.5cm}
   \centering
-  \includegraphics[width=0.8\textwidth]{pics/2_2_s}
-  \caption{Edge Magnitude}
+  \begin{subfigure}{.5\textwidth}
+    \centering
+    \includegraphics[width=0.7\linewidth]{pics/hw3_ex_1_bridge_canny}
+    \caption{canny of image}
+  \end{subfigure}%
+  \begin{subfigure}{.5\textwidth}
+    \centering
+    \includegraphics[width=0.7\linewidth]{pics/hw3_ex_1_bridge_result}
+    \caption{result line}
+   \end{subfigure}
+  \caption{Calculations of bridge.jpg}
 \end{figure}
-Result of Edge Magnitude
-
+\begin{figure}[!htb]
+  \vspace*{-1cm}
+  \centering
+  \begin{subfigure}{.5\textwidth}
+    \centering
+    \includegraphics[width=0.7\linewidth]{pics/hw3_ex_1_pool_canny}
+    \caption{canny of image}
+  \end{subfigure}%
+  \begin{subfigure}{.5\textwidth}
+    \centering
+    \includegraphics[width=0.7\linewidth]{pics/hw3_ex_1_pool_result}
+    \caption{result line}
+   \end{subfigure}
+  \caption{Calculations of pool.jpg}
+\end{figure}
+\begin{figure}[!htb]
+  \vspace*{-1cm}
+  \centering
+  \begin{subfigure}{.5\textwidth}
+    \centering
+    \includegraphics[width=0.7\linewidth]{pics/hw3_ex_1_tennis_canny}
+    \caption{canny of image}
+  \end{subfigure}%
+  \begin{subfigure}{.5\textwidth}
+    \centering
+    \includegraphics[width=0.7\linewidth]{pics/hw3_ex_1_tennis_result}
+    \caption{result line}
+   \end{subfigure}
+  \caption{Calculations of tennis.jpg}
+\end{figure}
+\noindent It is impressing with sigma 3 resulting in a small number of points, that so an accurate solution can be achieved. RANSAC is indeed a robust method. That is also why it can be used for real-time applications, such as self-steering cars.
 \newpage
-\subsubsection{Edge Images of Particular Directions}
-\begin{figure}[!htb]
-  \centering
-  \includegraphics[width=0.8\textwidth]{pics/2_3_s}
-  \caption{Result of a Circle}
-\end{figure}
-\begin{figure}[!htb]
-  \centering
-  \includegraphics[width=0.8\textwidth]{pics/2_3_s2}
-  \caption{Result of an image}
-\end{figure}
-Results of the edge orientations in both images.
+\subsection{Texture Synthesis}
 
-\subsubsection{Edge Non-Max Suppression}
-\begin{figure}[!htb]
-  \centering
-  \includegraphics[width=0.8\textwidth]{pics/2_4_s}
-  \caption{Image output of ex 2.4}
-\end{figure}
-Result of the polot of the original image, maginitude edge and the max suppression
-
+\subsubsection{compute\_ssd}
+It is in the computation of the SSD where a performance bottleneck can be easily created. Using the build in the function of the Numpy library and using only one loop is the key to success. Also very important is the preparation of the data, as it is for the whole exercise.
+\subsubsection{copy\_patch}
+Implementing this function was quite easy, but better results are achieved if the mask is staying in the range from 0 - 255, even if only the min and max value existed.
 \newpage
-\subsubsection{Canny Edge}
+\subsubsection{Results}
 \begin{figure}[!htb]
   \centering
-  \includegraphics[width=0.8\textwidth]{pics/2_5_s}
-  \caption{Result canny edge}
+  \includegraphics[width=1.0\linewidth]{pics/hw3_ex_2_donkey}
+  \caption{Calculations with donkey}
 \end{figure}
-Here a first result of the canny edge detector, the result. A different approch was taken as in max suppression.
-The idea was a simpler code, but the result is not quite satifying, as the threshold are not working as expected.
-
-\newpage
-\subsection{Corner Detection}
-
-\subsubsection{Harris Corner}
-The Harris Corner algorithm was implemented accourding to the steps from the slides ina
-the lectures.
-\subsubsection{Evaluation of Harris Corner}
 \begin{figure}[!htb]
   \centering
-  \includegraphics[width=0.5\textwidth]{pics/3_2_s}
-  \caption{Result Harris Corner}
+  \includegraphics[width=1.0\linewidth]{pics/hw3_ex_2_tomato}
+  \caption{Calculations with donkey}
 \end{figure}
-Plot from python program. The plot is quite dark but the result is good, as you can see later.
-
-\subsubsection{Rotation}
 \begin{figure}[!htb]
   \centering
-  \includegraphics[width=0.5\textwidth]{pics/3_3_s}
-  \caption{Result Harris Corner after the rotation}
+  \includegraphics[width=1.0\linewidth]{pics/hw3_ex_2_yacht}
+  \caption{Calculations with donkey}
 \end{figure}
-Plot from python program after rotation.
-
-\newpage
-\subsubsection{Factor of Halv}
-\begin{figure}[!htb]
-  \centering
-  \includegraphics[width=0.5\textwidth]{pics/3_4_s}
-  \caption{Result canny edge}
-\end{figure}
-Plot from python program after scaling. The edges become more visible, larger because auf thebibliography
-new resolution.
-
-\subsubsection{Properties of Harris Corner}
-The Harris Corner is a region, where a gradient goes in diferent directions. But these regions are difficult to
-differentiate from edges with a high gradient in only one direction. It is invariant to scaling (as seen above)
-because the structure matrix can be used for diagonal directions, better as from other gradients in x and y directions.
-
+\noindent Changing the half patch size variable to 5 and 10 did not really help to achieve better results. However, choosing the best texture patch is based on a random gauss, so the image looks from calculation to calculation a bit better or worse. With simple textures with less detail, the results are amazingly good. Several optimizations could be made in the choosing of the textures samples for the empty spot in the image.
 \newpage
 \subsection{Conclusion}
-In this assigment, many different approches for filtering have been examined. It is interesting that all of those appliences 
-have same origins, in our case, same methods that can be reused. Compared to the default implementation of numpy or cv2, or 
-implementation is quite not optimized. During the development stage, compairsion with the library was made. In the last exercise
-even the implementation of a library was used. Such basic function, must be robust and performant. So it is important from a 
-mathematical or computer science perspective to be as accurate as possible, regarding to the use in medical appliances.
+The work in this assignment was demanding and made a lot of fun. Only if everything is comprehended a solution could be rudimentary created. Lot of work was made in the preparation of the incoming data for the right structures for the calculations.
 
 
 \begin{thebibliography}{1}
   \bibitem{comp_intro} 
   Alasdair McAndrew
   \\\textit{A Computational Introduction to Digital Image Processing (2015)}. (English)  
-
-  \bibitem{py_tutorials} 
-  OpenCV Python Tutorials
-  \\\textit{https://opencv-python-tutroals.readthedocs.io (2019)}. (English)  
+  \bibitem{IEEE} 
+  Alexei A Efros and Thomas K Leung.
+  \\\textit{Texture synthesis by non-parametric sampling. In Computer Vision 1999. The Proceedings of the Seventh IEEE International Conference on, volume 2, pages 10331038. IEEE, 1999}. (English)
+  \bibitem{RANSAC} 
+  Random sample consensus
+  \\\textit{https://en.wikipedia.org/wiki/Random\_sample\_consensus (2019)}. (English)  
 \end{thebibliography}
 
 

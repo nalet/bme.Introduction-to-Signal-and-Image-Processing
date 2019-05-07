@@ -30,11 +30,9 @@ def edge_map(img, sigma):
     #
     # REPLACE THE FOLLOWING WITH YOUR CODE
     #
-    edges = np.zeros(img.shape[0:2])
-    grayImg = color.rgb2gray(img)
-    edges = feature.canny(grayImg, 3)
 
-    return edges
+    gray = color.rgb2gray(img)
+    return feature.canny(gray, sigma)
 
 
 ################
@@ -61,15 +59,11 @@ def fit_line(points):
     #
     # REPLACE THE FOLLOWING WITH YOUR CODE
     #
-    m = 0
-    c = 0
-
-    e = sys.float_info.epsilon
     if points[1][0]-points[0][0] == 0:
-        m = (points[1][1]-points[0][1])/((points[1][0]-points[0][0])+e)
+        m = (points[1][1]-points[0][1])/(points[1][0]-points[0][0]+sys.float_info.epsilon)
         c = points[0][1] - m*points[0][0]
     else:
-        m = (points[1][1]-points[0][1])/((points[1][0]-points[0][0]))
+        m = (points[1][1]-points[0][1])/(points[1][0]-points[0][0])
         c = points[0][1] - m*points[0][0]
 
     return m, c
@@ -94,9 +88,7 @@ def point_to_line_dist(m, c, x0, y0):
     #
     # REPLACE THE FOLLOWING WITH YOUR CODE
     #
-    dist = abs(m * x0 + (-1 * y0) + c) / np.sqrt(m ** 2 + 1)
-
-    return dist
+    return abs(m * x0 - y0 + c) / np.sqrt(m ** 2 + 1)
 
 
 ##############################################################################
@@ -112,7 +104,7 @@ if(len(sys.argv) > 1 and os.path.isfile('./'+sys.argv[1])):
     filename = sys.argv[1]
 
 image = plt.imread(filename)
-edges = edge_map(image, 1.4)
+edges = edge_map(image, 3)
 
 plt.imshow(edges)
 plt.title('edge map')

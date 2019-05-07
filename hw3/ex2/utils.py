@@ -37,7 +37,7 @@ def compute_ssd(patch, mask, texture, patch_half_size):
 
     mask = np.stack((mask, mask, mask), axis=-1)
     mask = np.where(mask > 0, 0, 1)
-    for ind, value in np.ndenumerate(ssd):
+    for ind, _ in np.ndenumerate(ssd):
         patch_tex = texture[ind[0]:ind[0]+2*patch_half_size + 1, ind[1]:ind[1]+2*patch_half_size+1]
         patch_tex = np.multiply(patch_tex, mask)
         ssd[ind] = np.sum((patch-patch_tex) ** 2)

@@ -108,7 +108,6 @@ while (len(fill_indices[0]) > 0):
             patch_to_fill, patch_mask, texture_img, patch_half_size)
 
         # Select the best texture patch
-        #selected_center_i, selected_center_j = None, None
         ssd_img1 = np.sort(np.copy(ssd_img), axis=None)
         ssdValue = ssd_img1[min(
             round(abs(random.gauss(0, 1))), np.size(ssd_img1)-1)]
