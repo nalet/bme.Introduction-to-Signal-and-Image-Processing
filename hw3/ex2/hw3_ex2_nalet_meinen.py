@@ -26,7 +26,7 @@ filename = 'donkey'
 #filename = 'tomato'
 # filename = 'yacht'
 
-if(len(sys.argv) > 1 and os.path.isfile('./'+sys.argv[1])):
+if(len(sys.argv) > 1 and os.path.isfile('./'+sys.argv[1]+'.jpg')):
     filename = sys.argv[1]
 
 # load image

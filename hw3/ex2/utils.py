@@ -38,8 +38,7 @@ def compute_ssd(patch, mask, texture, patch_half_size):
     mask = np.stack((mask, mask, mask), axis=-1)
     mask = np.where(mask > 0, 0, 1)
     for ind, value in np.ndenumerate(ssd):
-        patch_tex = texture[ind[0]:ind[0]+2*patch_half_size +
-                            1, ind[1]:ind[1]+2*patch_half_size+1]
+        patch_tex = texture[ind[0]:ind[0]+2*patch_half_size + 1, ind[1]:ind[1]+2*patch_half_size+1]
         patch_tex = np.multiply(patch_tex, mask)
         ssd[ind] = np.sum((patch-patch_tex) ** 2)
     return ssd
@@ -73,22 +72,14 @@ def copy_patch(img, mask, texture, iPatchCenter, jPatchCenter, iMatchCenter, jMa
 
     for i in range(patchSize):
         for j in range(patchSize):
-
-            # the x, y pixel postion in imHole image coordinate
-            i_hole = iPatchTopLeft + i
-            j_hole = jPatchTopLeft + j
-            # the x, y pixel position in texture image coordinate
-            i_texture = iMatchTopLeft + i
-            j_texture = jMatchTopLeft + j
-            # copy the RGB channels from the texture image to the imHole image
             if(mask[i][j] == 255):
-                res[i_hole][j_hole] = texture[i_texture][j_texture]
+                res[iPatchTopLeft + i][jPatchTopLeft + j] = texture[iMatchTopLeft + i][jMatchTopLeft + j]
 
     return res
 
 
 def find_edge(mask):
-    # Returns the edges of a binary mask image.
+    # Returns the edges of a binary mask image
     # The result edge_mask is a binary image highlighting the edges
     [cols, rows] = np.shape(mask)
     edge_mask = np.zeros(np.shape(mask))
